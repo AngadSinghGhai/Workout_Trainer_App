@@ -154,6 +154,34 @@ paths:
                 $ref: "#/components/schemas/Exercise"
 
   /workouts/{id}/exercises/{exerciseId}:
+    patch:
+      operationId: updateExercise
+      tags: [exercises]
+      summary: Update an exercise (e.g. swap to an alternative)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: exerciseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExerciseUpdate"
+      responses:
+        "200":
+          description: Updated exercise
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Exercise"
     delete:
       operationId: deleteExercise
       tags: [exercises]
@@ -378,6 +406,17 @@ components:
     ExerciseInput:
       type: object
       required: [name, muscleGroup]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        muscleGroup:
+          type: string
+        notes:
+          type: ["string", "null"]
+
+    ExerciseUpdate:
+      type: object
       properties:
         name:
           type: string

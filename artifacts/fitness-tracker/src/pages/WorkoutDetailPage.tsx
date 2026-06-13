@@ -7,13 +7,14 @@ import {
   getListWorkoutsQueryKey,
   useAddExercise,
   useDeleteExercise,
+  useUpdateExercise,
   useLogSet,
   useDeleteSet,
   useListExerciseTemplates,
 } from "@workspace/api-client-react";
 import { useRestTimer } from "@/hooks/useRestTimer";
 import { splitHexColors } from "@/lib/splits";
-import { ArrowLeft, Plus, X, ChevronDown, ChevronUp, Info } from "lucide-react";
+import { ArrowLeft, Plus, X, ChevronDown, ChevronUp, Info, Shuffle } from "lucide-react";
 
 type ExerciseTemplate = {
   id: number;
@@ -166,11 +167,33 @@ function ExerciseCard({
   const [reps, setReps] = useState("10");
   const [weight, setWeight] = useState("0");
   const [infoOpen, setInfoOpen] = useState(false);
+  const [swapOpen, setSwapOpen] = useState(false);
   const { mutate: logSet, isPending: logging } = useLogSet();
   const { mutate: deleteSet } = useDeleteSet();
   const { mutate: deleteExercise } = useDeleteExercise();
+  const { mutate: updateExercise, isPending: swapping } = useUpdateExercise();
 
   const template = templates.find((t) => t.name === exercise.name);
+
+  function handleSwap(altName: string) {
+    const altTemplate = templates.find((t) => t.name === altName);
+    updateExercise(
+      {
+        id: workoutId,
+        exerciseId: exercise.id,
+        data: {
+          name: altName,
+          muscleGroup: altTemplate?.muscleGroup ?? exercise.muscleGroup,
+        },
+      },
+      {
+        onSuccess: () => {
+          invalidate();
+          setSwapOpen(false);
+        },
+      }
+    );
+  }
 
   function invalidate() {
     queryClient.invalidateQueries({ queryKey: getGetWorkoutQueryKey(workoutId) });
@@ -221,6 +244,46 @@ function ExerciseCard({
         />
       )}
 
+      {/* Swap sheet */}
+      {swapOpen && template && template.alternatives.length > 0 && (
+        <div className="fixed inset-0 z-50 flex items-end" onClick={() => setSwapOpen(false)}>
+          <div
+            className="w-full rounded-t-2xl p-5 pb-8"
+            style={{ background: "hsl(220 12% 13%)", border: "1px solid rgba(255,255,255,0.1)" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-xs font-bold uppercase tracking-widest text-white/40">Machine full? Try instead:</p>
+              <button onClick={() => setSwapOpen(false)} className="text-white/30 active:text-white p-1">
+                <X size={18} />
+              </button>
+            </div>
+            <p className="text-base font-bold text-white mb-4">{exercise.name} →</p>
+            <div className="space-y-2.5">
+              {template.alternatives.map((alt) => {
+                const altT = templates.find((t) => t.name === alt);
+                return (
+                  <button
+                    key={alt}
+                    onClick={() => handleSwap(alt)}
+                    disabled={swapping}
+                    className="w-full flex items-center gap-3 p-3.5 rounded-xl text-left active:scale-[0.98] transition-transform disabled:opacity-50"
+                    style={{ backgroundColor: `${accentColor}15`, border: `1px solid ${accentColor}30` }}
+                  >
+                    <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: accentColor }} />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-white text-sm">{alt}</p>
+                      {altT && <p className="text-xs text-white/40 mt-0.5">{altT.muscleGroup}</p>}
+                    </div>
+                    <span className="text-xs font-bold" style={{ color: accentColor }}>Swap</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white/[0.04] rounded-2xl overflow-hidden border border-white/10">
         {/* Exercise header */}
         <div className="flex items-start justify-between p-4 pb-3">
@@ -236,12 +299,23 @@ function ExerciseCard({
               {exercise.muscleGroup}
             </p>
           </div>
-          <button
-            onClick={handleDeleteExercise}
-            className="text-white/20 active:text-white/60 p-1 -mr-1"
-          >
-            <X size={16} />
-          </button>
+          <div className="flex items-center gap-1">
+            {template && template.alternatives.length > 0 && (
+              <button
+                onClick={() => setSwapOpen(true)}
+                className="text-white/30 active:text-white/70 p-1.5 flex items-center gap-1"
+                title="Machine full? Swap exercise"
+              >
+                <Shuffle size={14} />
+              </button>
+            )}
+            <button
+              onClick={handleDeleteExercise}
+              className="text-white/20 active:text-white/60 p-1 -mr-1"
+            >
+              <X size={16} />
+            </button>
+          </div>
         </div>
 
         {/* Sets table */}

@@ -137,6 +137,41 @@ export const AddExerciseBody = zod.object({
 
 
 /**
+ * @summary Update an exercise (e.g. swap to an alternative)
+ */
+export const UpdateExerciseParams = zod.object({
+  "id": zod.coerce.number(),
+  "exerciseId": zod.coerce.number()
+})
+
+
+
+
+export const UpdateExerciseBody = zod.object({
+  "name": zod.string().min(1).optional(),
+  "muscleGroup": zod.string().optional(),
+  "notes": zod.string().nullish()
+})
+
+export const UpdateExerciseResponse = zod.object({
+  "id": zod.number(),
+  "workoutId": zod.number(),
+  "name": zod.string(),
+  "muscleGroup": zod.string(),
+  "order": zod.number(),
+  "notes": zod.string().nullish(),
+  "sets": zod.array(zod.object({
+  "id": zod.number(),
+  "exerciseId": zod.number(),
+  "setNumber": zod.number(),
+  "reps": zod.number(),
+  "weightKg": zod.number().nullish(),
+  "completedAt": zod.coerce.date()
+}))
+})
+
+
+/**
  * @summary Delete an exercise and its sets
  */
 export const DeleteExerciseParams = zod.object({

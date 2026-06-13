@@ -112,6 +112,14 @@ export interface ExerciseInput {
   notes?: string | null;
 }
 
+export interface ExerciseUpdate {
+  /** @minLength 1 */
+  name?: string;
+  muscleGroup?: string;
+  /** @nullable */
+  notes?: string | null;
+}
+
 export interface LogSetInput {
   /** @minimum 1 */
   reps: number;

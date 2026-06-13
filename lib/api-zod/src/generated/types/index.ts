@@ -11,6 +11,7 @@ export * from './exerciseInput';
 export * from './exerciseProgressSummary';
 export * from './exerciseTemplate';
 export * from './exerciseTemplateSplit';
+export * from './exerciseUpdate';
 export * from './healthStatus';
 export * from './listWorkoutsParams';
 export * from './logSetInput';

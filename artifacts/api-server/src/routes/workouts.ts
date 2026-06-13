@@ -140,6 +140,36 @@ router.post("/workouts/:id/exercises", async (req, res) => {
   }
 });
 
+router.patch("/workouts/:id/exercises/:exerciseId", async (req, res) => {
+  try {
+    const exerciseId = Number(req.params.exerciseId);
+    const { name, muscleGroup, notes } = req.body;
+    const updates: Record<string, unknown> = {};
+    if (name !== undefined) updates.name = name;
+    if (muscleGroup !== undefined) updates.muscleGroup = muscleGroup;
+    if (notes !== undefined) updates.notes = notes;
+
+    const [updated] = await db
+      .update(exercisesTable)
+      .set(updates)
+      .where(eq(exercisesTable.id, exerciseId))
+      .returning();
+
+    if (!updated) return res.status(404).json({ error: "Exercise not found" });
+
+    const sets = await db
+      .select()
+      .from(workoutSetsTable)
+      .where(eq(workoutSetsTable.exerciseId, exerciseId))
+      .orderBy(asc(workoutSetsTable.setNumber));
+
+    res.json({ ...updated, sets });
+  } catch (err) {
+    req.log.error({ err }, "Failed to update exercise");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 router.delete("/workouts/:id/exercises/:exerciseId", async (req, res) => {
   try {
     await db.delete(exercisesTable).where(eq(exercisesTable.id, Number(req.params.exerciseId)));
