@@ -261,7 +261,7 @@ function ExerciseCard({
                 <span className="text-sm font-mono text-white/40">{set.setNumber}</span>
                 <span className="text-sm font-mono font-bold text-white">{set.reps}</span>
                 <span className="text-sm font-mono font-bold text-white">
-                  {set.weightKg != null ? `${set.weightKg}kg` : "BW"}
+                  {set.weightKg != null ? `${set.weightKg} lbs` : "BW"}
                 </span>
                 <button
                   onClick={() => handleDeleteSet(set.id)}
@@ -288,7 +288,7 @@ function ExerciseCard({
             />
           </div>
           <div className="flex-1">
-            <p className="text-[10px] font-bold uppercase text-white/30 mb-1">Weight (kg)</p>
+            <p className="text-[10px] font-bold uppercase text-white/30 mb-1">Weight (lbs)</p>
             <input
               type="number"
               inputMode="decimal"
@@ -296,7 +296,7 @@ function ExerciseCard({
               onChange={(e) => setWeight(e.target.value)}
               className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-3 text-white font-mono font-bold text-center text-lg focus:outline-none focus:border-white/30"
               min={0}
-              step={2.5}
+              step={5}
             />
           </div>
           <div className="pt-4">

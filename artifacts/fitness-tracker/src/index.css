@@ -55,37 +55,37 @@
 :root, .dark {
   color-scheme: dark;
   
-  --background: 0 0% 0%;
-  --foreground: 0 0% 98%;
+  --background: 220 13% 7%;
+  --foreground: 0 0% 96%;
 
-  --border: 0 0% 15%;
-  --input: 0 0% 15%;
-  --ring: 0 0% 98%;
+  --border: 220 10% 18%;
+  --input: 220 10% 18%;
+  --ring: 220 10% 70%;
 
-  --card: 0 0% 4%;
-  --card-foreground: 0 0% 98%;
-  --card-border: 0 0% 15%;
+  --card: 220 12% 11%;
+  --card-foreground: 0 0% 96%;
+  --card-border: 220 10% 20%;
 
-  --popover: 0 0% 4%;
-  --popover-foreground: 0 0% 98%;
-  --popover-border: 0 0% 15%;
+  --popover: 220 12% 11%;
+  --popover-foreground: 0 0% 96%;
+  --popover-border: 220 10% 20%;
 
-  --primary: 0 0% 98%;
-  --primary-foreground: 0 0% 4%;
+  --primary: 0 0% 96%;
+  --primary-foreground: 220 13% 7%;
 
-  --secondary: 0 0% 12%;
-  --secondary-foreground: 0 0% 98%;
+  --secondary: 220 10% 16%;
+  --secondary-foreground: 0 0% 96%;
 
-  --muted: 0 0% 12%;
-  --muted-foreground: 0 0% 60%;
+  --muted: 220 10% 16%;
+  --muted-foreground: 220 8% 55%;
 
-  --accent: 0 0% 12%;
-  --accent-foreground: 0 0% 98%;
+  --accent: 220 10% 16%;
+  --accent-foreground: 0 0% 96%;
 
-  --destructive: 0 84% 60%;
+  --destructive: 0 72% 55%;
   --destructive-foreground: 0 0% 98%;
 
-  --radius: 0.25rem;
+  --radius: 0.75rem;
 }
 
 @layer base {

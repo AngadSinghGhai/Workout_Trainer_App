@@ -70,7 +70,7 @@ export default function RecordsPage() {
                       <div className="text-right">
                         {rec.maxWeightKg != null ? (
                           <p className="text-2xl font-black font-mono" style={{ color }}>
-                            {rec.maxWeightKg}<span className="text-sm font-bold text-white/40 ml-1">kg</span>
+                            {rec.maxWeightKg}<span className="text-sm font-bold text-white/40 ml-1">lbs</span>
                           </p>
                         ) : (
                           <p className="text-2xl font-black font-mono" style={{ color }}>BW</p>

@@ -8,7 +8,14 @@ import { ArrowLeft } from "lucide-react";
 
 type Split = "Push" | "Pull" | "Legs" | "Upper" | "Arms" | "Lower";
 
-const SPLITS: Split[] = ["Push", "Pull", "Legs", "Upper", "Arms", "Lower"];
+const SPLITS: { name: Split; description: string }[] = [
+  { name: "Push",  description: "Chest · Shoulders · Triceps" },
+  { name: "Pull",  description: "Back · Biceps · Forearms" },
+  { name: "Legs",  description: "Quads · Hamstrings · Calves" },
+  { name: "Upper", description: "Chest · Back · Shoulders" },
+  { name: "Arms",  description: "Biceps · Triceps · Forearms" },
+  { name: "Lower", description: "Quads · Hamstrings · Glutes" },
+];
 
 const defaultNames: Record<Split, string> = {
   Push: "Push Day",
@@ -29,11 +36,7 @@ export default function NewWorkoutPage() {
   const { mutate: createWorkout, isPending } = useCreateWorkout();
 
   const { register, handleSubmit, setValue, watch } = useForm({
-    defaultValues: {
-      split: "" as Split | "",
-      name: "",
-      date: todayStr(),
-    },
+    defaultValues: { split: "" as Split | "", name: "", date: todayStr() },
   });
 
   const selectedSplit = watch("split");
@@ -57,19 +60,20 @@ export default function NewWorkoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black">
-      <div className="p-4 flex items-center gap-3 border-b border-white/10">
-        <button onClick={() => navigate("/workouts")} className="text-white/60 active:text-white">
-          <ArrowLeft size={24} />
+    <div className="min-h-screen" style={{ background: "hsl(220 13% 7%)" }}>
+      <div className="p-4 flex items-center gap-3 border-b border-white/8">
+        <button onClick={() => navigate("/workouts")} className="text-white/50 active:text-white p-1">
+          <ArrowLeft size={22} />
         </button>
-        <h1 className="text-2xl font-black uppercase tracking-tighter text-white">New Session</h1>
+        <h1 className="text-xl font-bold text-white">New Session</h1>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit as any)} className="p-4 space-y-6">
+        {/* Split picker */}
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-white/40 mb-3">Choose Split</p>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-            {SPLITS.map((split) => {
+          <p className="text-sm font-semibold text-white/50 mb-3">Choose your split</p>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+            {SPLITS.map(({ name: split, description }) => {
               const color = splitHexColors[split];
               const isSelected = selectedSplit === split;
               return (
@@ -77,14 +81,21 @@ export default function NewWorkoutPage() {
                   key={split}
                   type="button"
                   onClick={() => pickSplit(split)}
-                  className="h-20 rounded-xl font-black text-xl uppercase tracking-tight transition-all active:scale-95"
+                  className="h-24 rounded-2xl text-left px-4 py-3 transition-all active:scale-95 flex flex-col justify-between"
                   style={{
-                    backgroundColor: isSelected ? color : "rgba(255,255,255,0.05)",
-                    color: isSelected ? "#000" : color,
-                    border: `2px solid ${isSelected ? color : "rgba(255,255,255,0.1)"}`,
+                    backgroundColor: isSelected ? `${color}20` : "rgba(255,255,255,0.05)",
+                    border: `1.5px solid ${isSelected ? color : "rgba(255,255,255,0.08)"}`,
                   }}
                 >
-                  {split}
+                  <span
+                    className="text-lg font-bold leading-none"
+                    style={{ color: isSelected ? color : "white" }}
+                  >
+                    {split}
+                  </span>
+                  <span className="text-[11px] leading-tight" style={{ color: isSelected ? `${color}99` : "rgba(255,255,255,0.35)" }}>
+                    {description}
+                  </span>
                 </button>
               );
             })}
@@ -94,30 +105,32 @@ export default function NewWorkoutPage() {
         {selectedSplit && (
           <>
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-white/40 mb-2">Session Name</p>
+              <p className="text-sm font-semibold text-white/50 mb-2">Session name</p>
               <input
                 {...register("name", { required: true })}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-4 text-white text-lg font-bold focus:outline-none focus:border-white/40"
-                placeholder="Workout name"
+                className="w-full rounded-xl px-4 py-3.5 text-white text-base font-medium focus:outline-none"
+                style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(255,255,255,0.1)" }}
+                placeholder="e.g. Push Day"
               />
             </div>
 
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-white/40 mb-2">Date</p>
+              <p className="text-sm font-semibold text-white/50 mb-2">Date</p>
               <input
                 {...register("date", { required: true })}
                 type="date"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-4 text-white text-lg font-bold focus:outline-none focus:border-white/40"
+                className="w-full rounded-xl px-4 py-3.5 text-white text-base font-medium focus:outline-none"
+                style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(255,255,255,0.1)" }}
               />
             </div>
 
             <button
               type="submit"
               disabled={isPending}
-              className="w-full py-5 rounded-xl font-black text-xl uppercase tracking-tight text-black transition-all active:scale-95 disabled:opacity-50"
+              className="w-full py-4 rounded-2xl font-bold text-base text-black transition-all active:scale-[0.98] disabled:opacity-50"
               style={{ backgroundColor: splitHexColors[selectedSplit] }}
             >
-              {isPending ? "Starting..." : "Start Session"}
+              {isPending ? "Starting…" : `Start ${selectedSplit} Session`}
             </button>
           </>
         )}

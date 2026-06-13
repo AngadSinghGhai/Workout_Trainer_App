@@ -54,7 +54,7 @@ export default function ProgressPage() {
 
   const chartData = (current?.dataPoints ?? []).map((dp) => ({
     date: dp.date.slice(5),
-    "Max Weight": dp.maxWeightKg ?? 0,
+    "Max Weight (lbs)": dp.maxWeightKg ?? 0,
     Volume: Math.round(dp.totalVolume),
   }));
 
@@ -85,7 +85,7 @@ export default function ProgressPage() {
           </div>
 
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-white/40 mb-3">Max Weight (kg)</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-white/40 mb-3">Max Weight (lbs)</p>
             <div className="h-48">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData} margin={{ top: 4, right: 4, left: -24, bottom: 0 }}>
@@ -95,7 +95,7 @@ export default function ProgressPage() {
                     contentStyle={{ background: "#111", border: `1px solid ${accentColor}40`, borderRadius: 8, color: "#fff" }}
                     cursor={{ fill: "rgba(255,255,255,0.05)" }}
                   />
-                  <Bar dataKey="Max Weight" fill={accentColor} radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="Max Weight (lbs)" fill={accentColor} radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
