@@ -73,10 +73,10 @@ router.get("/workouts/:id", async (req, res) => {
       })
     );
 
-    res.json({ ...workout, exercises: exercisesWithSets });
+    return res.json({ ...workout, exercises: exercisesWithSets });
   } catch (err) {
     req.log.error({ err }, "Failed to get workout");
-    res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -100,10 +100,10 @@ router.patch("/workouts/:id", async (req, res) => {
       .leftJoin(workoutSetsTable, eq(workoutSetsTable.exerciseId, exercisesTable.id))
       .where(eq(exercisesTable.workoutId, id));
 
-    res.json({ ...updated, ...counts });
+    return res.json({ ...updated, ...counts });
   } catch (err) {
     req.log.error({ err }, "Failed to update workout");
-    res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -163,10 +163,10 @@ router.patch("/workouts/:id/exercises/:exerciseId", async (req, res) => {
       .where(eq(workoutSetsTable.exerciseId, exerciseId))
       .orderBy(asc(workoutSetsTable.setNumber));
 
-    res.json({ ...updated, sets });
+    return res.json({ ...updated, sets });
   } catch (err) {
     req.log.error({ err }, "Failed to update exercise");
-    res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 
