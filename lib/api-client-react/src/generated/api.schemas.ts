@@ -3,122 +3,103 @@
  * Do not edit manually.
  * Api
  * Fitness Tracker API
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 export interface HealthStatus {
   status: string;
 }
 
-export type WorkoutType = typeof WorkoutType[keyof typeof WorkoutType];
+export type WorkoutSplit = typeof WorkoutSplit[keyof typeof WorkoutSplit];
 
 
-export const WorkoutType = {
-  strength: 'strength',
-  cardio: 'cardio',
-  flexibility: 'flexibility',
-  hiit: 'hiit',
-  sport: 'sport',
-  other: 'other',
+export const WorkoutSplit = {
+  Push: 'Push',
+  Pull: 'Pull',
+  Legs: 'Legs',
+  Upper: 'Upper',
+  Arms: 'Arms',
+  Lower: 'Lower',
 } as const;
 
 export interface Workout {
   id: number;
   name: string;
   date: string;
-  type: WorkoutType;
-  /** @nullable */
-  durationMinutes?: number | null;
+  split: WorkoutSplit;
   /** @nullable */
   notes?: string | null;
   exerciseCount?: number;
+  totalSets: number;
   createdAt: string;
 }
 
-export type WorkoutDetailType = typeof WorkoutDetailType[keyof typeof WorkoutDetailType];
+export type WorkoutDetailSplit = typeof WorkoutDetailSplit[keyof typeof WorkoutDetailSplit];
 
 
-export const WorkoutDetailType = {
-  strength: 'strength',
-  cardio: 'cardio',
-  flexibility: 'flexibility',
-  hiit: 'hiit',
-  sport: 'sport',
-  other: 'other',
+export const WorkoutDetailSplit = {
+  Push: 'Push',
+  Pull: 'Pull',
+  Legs: 'Legs',
+  Upper: 'Upper',
+  Arms: 'Arms',
+  Lower: 'Lower',
 } as const;
+
+export interface WorkoutSet {
+  id: number;
+  exerciseId: number;
+  setNumber: number;
+  reps: number;
+  /** @nullable */
+  weightKg?: number | null;
+  completedAt: string;
+}
 
 export interface Exercise {
   id: number;
   workoutId: number;
   name: string;
   muscleGroup: string;
-  /** @nullable */
-  sets?: number | null;
-  /** @nullable */
-  reps?: number | null;
-  /** @nullable */
-  weightKg?: number | null;
-  /** @nullable */
-  durationMinutes?: number | null;
+  order: number;
   /** @nullable */
   notes?: string | null;
-  order: number;
+  sets: WorkoutSet[];
 }
 
 export interface WorkoutDetail {
   id: number;
   name: string;
   date: string;
-  type: WorkoutDetailType;
-  /** @nullable */
-  durationMinutes?: number | null;
+  split: WorkoutDetailSplit;
   /** @nullable */
   notes?: string | null;
   exercises: Exercise[];
   createdAt: string;
 }
 
-export type WorkoutInputType = typeof WorkoutInputType[keyof typeof WorkoutInputType];
+export type WorkoutInputSplit = typeof WorkoutInputSplit[keyof typeof WorkoutInputSplit];
 
 
-export const WorkoutInputType = {
-  strength: 'strength',
-  cardio: 'cardio',
-  flexibility: 'flexibility',
-  hiit: 'hiit',
-  sport: 'sport',
-  other: 'other',
+export const WorkoutInputSplit = {
+  Push: 'Push',
+  Pull: 'Pull',
+  Legs: 'Legs',
+  Upper: 'Upper',
+  Arms: 'Arms',
+  Lower: 'Lower',
 } as const;
 
 export interface WorkoutInput {
   /** @minLength 1 */
   name: string;
   date: string;
-  type: WorkoutInputType;
-  /** @nullable */
-  durationMinutes?: number | null;
+  split: WorkoutInputSplit;
   /** @nullable */
   notes?: string | null;
 }
 
-export type WorkoutUpdateType = typeof WorkoutUpdateType[keyof typeof WorkoutUpdateType];
-
-
-export const WorkoutUpdateType = {
-  strength: 'strength',
-  cardio: 'cardio',
-  flexibility: 'flexibility',
-  hiit: 'hiit',
-  sport: 'sport',
-  other: 'other',
-} as const;
-
 export interface WorkoutUpdate {
-  /** @minLength 1 */
   name?: string;
-  date?: string;
-  type?: WorkoutUpdateType;
-  /** @nullable */
-  durationMinutes?: number | null;
   /** @nullable */
   notes?: string | null;
 }
@@ -128,77 +109,64 @@ export interface ExerciseInput {
   name: string;
   muscleGroup: string;
   /** @nullable */
-  sets?: number | null;
-  /** @nullable */
-  reps?: number | null;
-  /** @nullable */
-  weightKg?: number | null;
-  /** @nullable */
-  durationMinutes?: number | null;
-  /** @nullable */
   notes?: string | null;
 }
 
-export interface ExerciseUpdate {
-  name?: string;
-  muscleGroup?: string;
-  /** @nullable */
-  sets?: number | null;
-  /** @nullable */
-  reps?: number | null;
+export interface LogSetInput {
+  /** @minimum 1 */
+  reps: number;
   /** @nullable */
   weightKg?: number | null;
-  /** @nullable */
-  durationMinutes?: number | null;
-  /** @nullable */
-  notes?: string | null;
 }
 
-export type ExerciseTemplateType = typeof ExerciseTemplateType[keyof typeof ExerciseTemplateType];
+export type ExerciseTemplateSplit = typeof ExerciseTemplateSplit[keyof typeof ExerciseTemplateSplit];
 
 
-export const ExerciseTemplateType = {
-  strength: 'strength',
-  cardio: 'cardio',
-  flexibility: 'flexibility',
-  hiit: 'hiit',
-  sport: 'sport',
-  other: 'other',
+export const ExerciseTemplateSplit = {
+  Push: 'Push',
+  Pull: 'Pull',
+  Legs: 'Legs',
+  Upper: 'Upper',
+  Arms: 'Arms',
+  Lower: 'Lower',
 } as const;
 
 export interface ExerciseTemplate {
   id: number;
   name: string;
   muscleGroup: string;
-  type: ExerciseTemplateType;
+  split: ExerciseTemplateSplit;
+  musclesWorked: string;
+  formTip: string;
+  alternatives: string[];
 }
 
-export interface StatsSummary {
-  totalWorkouts: number;
-  totalDurationMinutes: number;
-  thisWeekWorkouts: number;
-  thisMonthWorkouts: number;
-  avgDurationMinutes: number;
-  currentStreak: number;
+export interface ProgressDataPoint {
+  date: string;
+  /** @nullable */
+  maxWeightKg: number | null;
+  totalVolume: number;
+  totalReps: number;
 }
 
-export interface WeeklyStats {
-  week: string;
-  count: number;
-  totalDurationMinutes: number;
-}
-
-export interface MuscleGroupStats {
+export interface ExerciseProgressSummary {
+  exerciseName: string;
   muscleGroup: string;
-  count: number;
+  dataPoints: ProgressDataPoint[];
+}
+
+export interface PersonalRecord {
+  exerciseName: string;
+  muscleGroup: string;
+  /** @nullable */
+  maxWeightKg: number | null;
+  maxReps: number;
+  achievedDate: string;
+  workoutName: string;
 }
 
 export type ListWorkoutsParams = {
 limit?: number;
 offset?: number;
-};
-
-export type GetWeeklyStatsParams = {
-weeks?: number;
 };
 

@@ -3,18 +3,16 @@
  * Do not edit manually.
  * Api
  * Fitness Tracker API
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { Exercise } from './exercise';
-import type { WorkoutDetailType } from './workoutDetailType';
+import type { WorkoutDetailSplit } from './workoutDetailSplit';
 
 export interface WorkoutDetail {
   id: number;
   name: string;
   date: Date;
-  type: WorkoutDetailType;
-  /** @nullable */
-  durationMinutes?: number | null;
+  split: WorkoutDetailSplit;
   /** @nullable */
   notes?: string | null;
   exercises: Exercise[];

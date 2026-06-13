@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Api
  * Fitness Tracker API
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import * as zod from 'zod';
 
@@ -17,9 +17,9 @@ export const HealthCheckResponse = zod.object({
 
 
 /**
- * @summary List all workouts
+ * @summary List all workouts ordered by date desc
  */
-export const listWorkoutsQueryLimitDefault = 50;
+export const listWorkoutsQueryLimitDefault = 100;
 export const listWorkoutsQueryOffsetDefault = 0;
 
 export const ListWorkoutsQueryParams = zod.object({
@@ -31,10 +31,10 @@ export const ListWorkoutsResponseItem = zod.object({
   "id": zod.number(),
   "name": zod.string(),
   "date": zod.coerce.date(),
-  "type": zod.enum(['strength', 'cardio', 'flexibility', 'hiit', 'sport', 'other']),
-  "durationMinutes": zod.number().nullish(),
+  "split": zod.enum(['Push', 'Pull', 'Legs', 'Upper', 'Arms', 'Lower']),
   "notes": zod.string().nullish(),
   "exerciseCount": zod.number().optional(),
+  "totalSets": zod.number(),
   "createdAt": zod.coerce.date()
 })
 export const ListWorkoutsResponse = zod.array(ListWorkoutsResponseItem)
@@ -49,14 +49,13 @@ export const ListWorkoutsResponse = zod.array(ListWorkoutsResponseItem)
 export const CreateWorkoutBody = zod.object({
   "name": zod.string().min(1),
   "date": zod.coerce.date(),
-  "type": zod.enum(['strength', 'cardio', 'flexibility', 'hiit', 'sport', 'other']),
-  "durationMinutes": zod.number().nullish(),
+  "split": zod.enum(['Push', 'Pull', 'Legs', 'Upper', 'Arms', 'Lower']),
   "notes": zod.string().nullish()
 })
 
 
 /**
- * @summary Get a workout with its exercises
+ * @summary Get a workout with its exercises and logged sets
  */
 export const GetWorkoutParams = zod.object({
   "id": zod.coerce.number()
@@ -66,20 +65,23 @@ export const GetWorkoutResponse = zod.object({
   "id": zod.number(),
   "name": zod.string(),
   "date": zod.coerce.date(),
-  "type": zod.enum(['strength', 'cardio', 'flexibility', 'hiit', 'sport', 'other']),
-  "durationMinutes": zod.number().nullish(),
+  "split": zod.enum(['Push', 'Pull', 'Legs', 'Upper', 'Arms', 'Lower']),
   "notes": zod.string().nullish(),
   "exercises": zod.array(zod.object({
   "id": zod.number(),
   "workoutId": zod.number(),
   "name": zod.string(),
   "muscleGroup": zod.string(),
-  "sets": zod.number().nullish(),
-  "reps": zod.number().nullish(),
-  "weightKg": zod.number().nullish(),
-  "durationMinutes": zod.number().nullish(),
+  "order": zod.number(),
   "notes": zod.string().nullish(),
-  "order": zod.number()
+  "sets": zod.array(zod.object({
+  "id": zod.number(),
+  "exerciseId": zod.number(),
+  "setNumber": zod.number(),
+  "reps": zod.number(),
+  "weightKg": zod.number().nullish(),
+  "completedAt": zod.coerce.date()
+}))
 })),
   "createdAt": zod.coerce.date()
 })
@@ -92,14 +94,8 @@ export const UpdateWorkoutParams = zod.object({
   "id": zod.coerce.number()
 })
 
-
-
-
 export const UpdateWorkoutBody = zod.object({
-  "name": zod.string().min(1).optional(),
-  "date": zod.coerce.date().optional(),
-  "type": zod.enum(['strength', 'cardio', 'flexibility', 'hiit', 'sport', 'other']).optional(),
-  "durationMinutes": zod.number().nullish(),
+  "name": zod.string().optional(),
   "notes": zod.string().nullish()
 })
 
@@ -107,10 +103,10 @@ export const UpdateWorkoutResponse = zod.object({
   "id": zod.number(),
   "name": zod.string(),
   "date": zod.coerce.date(),
-  "type": zod.enum(['strength', 'cardio', 'flexibility', 'hiit', 'sport', 'other']),
-  "durationMinutes": zod.number().nullish(),
+  "split": zod.enum(['Push', 'Pull', 'Legs', 'Upper', 'Arms', 'Lower']),
   "notes": zod.string().nullish(),
   "exerciseCount": zod.number().optional(),
+  "totalSets": zod.number(),
   "createdAt": zod.coerce.date()
 })
 
@@ -136,48 +132,12 @@ export const AddExerciseParams = zod.object({
 export const AddExerciseBody = zod.object({
   "name": zod.string().min(1),
   "muscleGroup": zod.string(),
-  "sets": zod.number().nullish(),
-  "reps": zod.number().nullish(),
-  "weightKg": zod.number().nullish(),
-  "durationMinutes": zod.number().nullish(),
   "notes": zod.string().nullish()
 })
 
 
 /**
- * @summary Update an exercise
- */
-export const UpdateExerciseParams = zod.object({
-  "id": zod.coerce.number(),
-  "exerciseId": zod.coerce.number()
-})
-
-export const UpdateExerciseBody = zod.object({
-  "name": zod.string().optional(),
-  "muscleGroup": zod.string().optional(),
-  "sets": zod.number().nullish(),
-  "reps": zod.number().nullish(),
-  "weightKg": zod.number().nullish(),
-  "durationMinutes": zod.number().nullish(),
-  "notes": zod.string().nullish()
-})
-
-export const UpdateExerciseResponse = zod.object({
-  "id": zod.number(),
-  "workoutId": zod.number(),
-  "name": zod.string(),
-  "muscleGroup": zod.string(),
-  "sets": zod.number().nullish(),
-  "reps": zod.number().nullish(),
-  "weightKg": zod.number().nullish(),
-  "durationMinutes": zod.number().nullish(),
-  "notes": zod.string().nullish(),
-  "order": zod.number()
-})
-
-
-/**
- * @summary Delete an exercise
+ * @summary Delete an exercise and its sets
  */
 export const DeleteExerciseParams = zod.object({
   "id": zod.coerce.number(),
@@ -186,54 +146,74 @@ export const DeleteExerciseParams = zod.object({
 
 
 /**
- * @summary List exercise templates
+ * @summary Log a set for an exercise
+ */
+export const LogSetParams = zod.object({
+  "id": zod.coerce.number(),
+  "exerciseId": zod.coerce.number()
+})
+
+
+
+
+export const LogSetBody = zod.object({
+  "reps": zod.number().min(1),
+  "weightKg": zod.number().nullish()
+})
+
+
+/**
+ * @summary Delete a logged set
+ */
+export const DeleteSetParams = zod.object({
+  "id": zod.coerce.number(),
+  "exerciseId": zod.coerce.number(),
+  "setId": zod.coerce.number()
+})
+
+
+/**
+ * @summary List all exercise templates with info and alternatives
  */
 export const ListExerciseTemplatesResponseItem = zod.object({
   "id": zod.number(),
   "name": zod.string(),
   "muscleGroup": zod.string(),
-  "type": zod.enum(['strength', 'cardio', 'flexibility', 'hiit', 'sport', 'other'])
+  "split": zod.enum(['Push', 'Pull', 'Legs', 'Upper', 'Arms', 'Lower']),
+  "musclesWorked": zod.string(),
+  "formTip": zod.string(),
+  "alternatives": zod.array(zod.string())
 })
 export const ListExerciseTemplatesResponse = zod.array(ListExerciseTemplatesResponseItem)
 
 
 /**
- * @summary Get overall fitness stats summary
+ * @summary Get progress data for all exercises (max weight and volume over time)
  */
-export const GetStatsSummaryResponse = zod.object({
-  "totalWorkouts": zod.number(),
-  "totalDurationMinutes": zod.number(),
-  "thisWeekWorkouts": zod.number(),
-  "thisMonthWorkouts": zod.number(),
-  "avgDurationMinutes": zod.number(),
-  "currentStreak": zod.number()
-})
-
-
-/**
- * @summary Get workouts per week for chart
- */
-export const getWeeklyStatsQueryWeeksDefault = 8;
-
-export const GetWeeklyStatsQueryParams = zod.object({
-  "weeks": zod.coerce.number().default(getWeeklyStatsQueryWeeksDefault)
-})
-
-export const GetWeeklyStatsResponseItem = zod.object({
-  "week": zod.string(),
-  "count": zod.number(),
-  "totalDurationMinutes": zod.number()
-})
-export const GetWeeklyStatsResponse = zod.array(GetWeeklyStatsResponseItem)
-
-
-/**
- * @summary Get exercise volume by muscle group
- */
-export const GetMuscleGroupStatsResponseItem = zod.object({
+export const GetProgressResponseItem = zod.object({
+  "exerciseName": zod.string(),
   "muscleGroup": zod.string(),
-  "count": zod.number()
+  "dataPoints": zod.array(zod.object({
+  "date": zod.coerce.date(),
+  "maxWeightKg": zod.number().nullable(),
+  "totalVolume": zod.number(),
+  "totalReps": zod.number()
+}))
 })
-export const GetMuscleGroupStatsResponse = zod.array(GetMuscleGroupStatsResponseItem)
+export const GetProgressResponse = zod.array(GetProgressResponseItem)
+
+
+/**
+ * @summary All-time personal records per exercise
+ */
+export const GetPersonalRecordsResponseItem = zod.object({
+  "exerciseName": zod.string(),
+  "muscleGroup": zod.string(),
+  "maxWeightKg": zod.number().nullable(),
+  "maxReps": zod.number(),
+  "achievedDate": zod.coerce.date(),
+  "workoutName": zod.string()
+})
+export const GetPersonalRecordsResponse = zod.array(GetPersonalRecordsResponseItem)
 
 

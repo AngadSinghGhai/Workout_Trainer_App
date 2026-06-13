@@ -3,25 +3,24 @@
  * Do not edit manually.
  * Api
  * Fitness Tracker API
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 
 export * from './exercise';
 export * from './exerciseInput';
+export * from './exerciseProgressSummary';
 export * from './exerciseTemplate';
-export * from './exerciseTemplateType';
-export * from './exerciseUpdate';
-export * from './getWeeklyStatsParams';
+export * from './exerciseTemplateSplit';
 export * from './healthStatus';
 export * from './listWorkoutsParams';
-export * from './muscleGroupStats';
-export * from './statsSummary';
-export * from './weeklyStats';
+export * from './logSetInput';
+export * from './personalRecord';
+export * from './progressDataPoint';
 export * from './workout';
 export * from './workoutDetail';
-export * from './workoutDetailType';
+export * from './workoutDetailSplit';
 export * from './workoutInput';
-export * from './workoutInputType';
-export * from './workoutType';
+export * from './workoutInputSplit';
+export * from './workoutSet';
+export * from './workoutSplit';
 export * from './workoutUpdate';
-export * from './workoutUpdateType';

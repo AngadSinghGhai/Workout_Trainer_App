@@ -1,30 +1,44 @@
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import NotFound from "@/pages/not-found";
 
-import Layout from "@/components/layout";
-import Dashboard from "@/pages/dashboard";
-import WorkoutList from "@/pages/workouts/list";
-import WorkoutNew from "@/pages/workouts/new";
-import WorkoutDetail from "@/pages/workouts/detail";
-import WorkoutEdit from "@/pages/workouts/edit";
+import BottomNav from "@/components/BottomNav";
+import HistoryPage from "@/pages/HistoryPage";
+import NewWorkoutPage from "@/pages/NewWorkoutPage";
+import WorkoutDetailPage from "@/pages/WorkoutDetailPage";
+import ProgressPage from "@/pages/ProgressPage";
+import RecordsPage from "@/pages/RecordsPage";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 function Router() {
   return (
-    <Layout>
+    <div className="pb-16 min-h-[100dvh] bg-background">
       <Switch>
-        <Route path="/" component={Dashboard} />
-        <Route path="/workouts" component={WorkoutList} />
-        <Route path="/workouts/new" component={WorkoutNew} />
-        <Route path="/workouts/:id" component={WorkoutDetail} />
-        <Route path="/workouts/:id/edit" component={WorkoutEdit} />
-        <Route component={NotFound} />
+        <Route path="/">
+          <Redirect to="/workouts" />
+        </Route>
+        <Route path="/workouts" component={HistoryPage} />
+        <Route path="/workouts/new" component={NewWorkoutPage} />
+        <Route path="/workouts/:id" component={WorkoutDetailPage} />
+        <Route path="/progress" component={ProgressPage} />
+        <Route path="/records" component={RecordsPage} />
+        <Route>
+          <div className="flex h-screen items-center justify-center">
+            <h1 className="text-2xl font-bold">404 Not Found</h1>
+          </div>
+        </Route>
       </Switch>
-    </Layout>
+      <BottomNav />
+    </div>
   );
 }
 

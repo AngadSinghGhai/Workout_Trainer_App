@@ -1,22 +1,19 @@
 openapi: 3.1.0
 info:
   title: Api
-  version: 0.1.0
+  version: 0.2.0
   description: Fitness Tracker API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
-    description: Health operations
   - name: workouts
-    description: Workout sessions
   - name: exercises
-    description: Exercises within workouts
+  - name: sets
   - name: templates
-    description: Exercise templates
-  - name: stats
-    description: Statistics and aggregates
+  - name: progress
+  - name: records
 paths:
   /healthz:
     get:
@@ -35,13 +32,13 @@ paths:
     get:
       operationId: listWorkouts
       tags: [workouts]
-      summary: List all workouts
+      summary: List all workouts ordered by date desc
       parameters:
         - name: limit
           in: query
           schema:
             type: integer
-            default: 50
+            default: 100
         - name: offset
           in: query
           schema:
@@ -78,7 +75,7 @@ paths:
     get:
       operationId: getWorkout
       tags: [workouts]
-      summary: Get a workout with its exercises
+      summary: Get a workout with its exercises and logged sets
       parameters:
         - name: id
           in: path
@@ -87,7 +84,7 @@ paths:
             type: integer
       responses:
         "200":
-          description: Workout with exercises
+          description: Workout with exercises and sets
           content:
             application/json:
               schema:
@@ -157,10 +154,30 @@ paths:
                 $ref: "#/components/schemas/Exercise"
 
   /workouts/{id}/exercises/{exerciseId}:
-    patch:
-      operationId: updateExercise
+    delete:
+      operationId: deleteExercise
       tags: [exercises]
-      summary: Update an exercise
+      summary: Delete an exercise and its sets
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: exerciseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /workouts/{id}/exercises/{exerciseId}/sets:
+    post:
+      operationId: logSet
+      tags: [sets]
+      summary: Log a set for an exercise
       parameters:
         - name: id
           in: path
@@ -177,18 +194,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ExerciseUpdate"
+              $ref: "#/components/schemas/LogSetInput"
       responses:
-        "200":
-          description: Updated exercise
+        "201":
+          description: Logged set
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Exercise"
+                $ref: "#/components/schemas/WorkoutSet"
+
+  /workouts/{id}/exercises/{exerciseId}/sets/{setId}:
     delete:
-      operationId: deleteExercise
-      tags: [exercises]
-      summary: Delete an exercise
+      operationId: deleteSet
+      tags: [sets]
+      summary: Delete a logged set
       parameters:
         - name: id
           in: path
@@ -196,6 +215,11 @@ paths:
           schema:
             type: integer
         - name: exerciseId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: setId
           in: path
           required: true
           schema:
@@ -208,10 +232,10 @@ paths:
     get:
       operationId: listExerciseTemplates
       tags: [templates]
-      summary: List exercise templates
+      summary: List all exercise templates with info and alternatives
       responses:
         "200":
-          description: List of templates
+          description: Templates grouped by split
           content:
             application/json:
               schema:
@@ -219,54 +243,35 @@ paths:
                 items:
                   $ref: "#/components/schemas/ExerciseTemplate"
 
-  /stats/summary:
+  /progress:
     get:
-      operationId: getStatsSummary
-      tags: [stats]
-      summary: Get overall fitness stats summary
+      operationId: getProgress
+      tags: [progress]
+      summary: Get progress data for all exercises (max weight and volume over time)
       responses:
         "200":
-          description: Stats summary
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/StatsSummary"
-
-  /stats/weekly:
-    get:
-      operationId: getWeeklyStats
-      tags: [stats]
-      summary: Get workouts per week for chart
-      parameters:
-        - name: weeks
-          in: query
-          schema:
-            type: integer
-            default: 8
-      responses:
-        "200":
-          description: Weekly stats
+          description: Progress per exercise
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/WeeklyStats"
+                  $ref: "#/components/schemas/ExerciseProgressSummary"
 
-  /stats/muscle-groups:
+  /personal-records:
     get:
-      operationId: getMuscleGroupStats
-      tags: [stats]
-      summary: Get exercise volume by muscle group
+      operationId: getPersonalRecords
+      tags: [records]
+      summary: All-time personal records per exercise
       responses:
         "200":
-          description: Muscle group breakdown
+          description: Personal records
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/MuscleGroupStats"
+                  $ref: "#/components/schemas/PersonalRecord"
 
 components:
   schemas:
@@ -279,7 +284,7 @@ components:
 
     Workout:
       type: object
-      required: [id, name, date, type, createdAt]
+      required: [id, name, date, split, createdAt, totalSets]
       properties:
         id:
           type: integer
@@ -288,14 +293,14 @@ components:
         date:
           type: string
           format: date
-        type:
+        split:
           type: string
-          enum: [strength, cardio, flexibility, hiit, sport, other]
-        durationMinutes:
-          type: ["integer", "null"]
+          enum: [Push, Pull, Legs, Upper, Arms, Lower]
         notes:
           type: ["string", "null"]
         exerciseCount:
+          type: integer
+        totalSets:
           type: integer
         createdAt:
           type: string
@@ -303,7 +308,7 @@ components:
 
     WorkoutDetail:
       type: object
-      required: [id, name, date, type, exercises, createdAt]
+      required: [id, name, date, split, exercises, createdAt]
       properties:
         id:
           type: integer
@@ -312,11 +317,9 @@ components:
         date:
           type: string
           format: date
-        type:
+        split:
           type: string
-          enum: [strength, cardio, flexibility, hiit, sport, other]
-        durationMinutes:
-          type: ["integer", "null"]
+          enum: [Push, Pull, Legs, Upper, Arms, Lower]
         notes:
           type: ["string", "null"]
         exercises:
@@ -329,7 +332,7 @@ components:
 
     WorkoutInput:
       type: object
-      required: [name, date, type]
+      required: [name, date, split]
       properties:
         name:
           type: string
@@ -337,11 +340,9 @@ components:
         date:
           type: string
           format: date
-        type:
+        split:
           type: string
-          enum: [strength, cardio, flexibility, hiit, sport, other]
-        durationMinutes:
-          type: ["integer", "null"]
+          enum: [Push, Pull, Legs, Upper, Arms, Lower]
         notes:
           type: ["string", "null"]
 
@@ -350,21 +351,12 @@ components:
       properties:
         name:
           type: string
-          minLength: 1
-        date:
-          type: string
-          format: date
-        type:
-          type: string
-          enum: [strength, cardio, flexibility, hiit, sport, other]
-        durationMinutes:
-          type: ["integer", "null"]
         notes:
           type: ["string", "null"]
 
     Exercise:
       type: object
-      required: [id, workoutId, name, muscleGroup, order]
+      required: [id, workoutId, name, muscleGroup, order, sets]
       properties:
         id:
           type: integer
@@ -374,18 +366,14 @@ components:
           type: string
         muscleGroup:
           type: string
-        sets:
-          type: ["integer", "null"]
-        reps:
-          type: ["integer", "null"]
-        weightKg:
-          type: ["number", "null"]
-        durationMinutes:
-          type: ["integer", "null"]
-        notes:
-          type: ["string", "null"]
         order:
           type: integer
+        notes:
+          type: ["string", "null"]
+        sets:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkoutSet"
 
     ExerciseInput:
       type: object
@@ -396,38 +384,40 @@ components:
           minLength: 1
         muscleGroup:
           type: string
-        sets:
-          type: ["integer", "null"]
-        reps:
-          type: ["integer", "null"]
-        weightKg:
-          type: ["number", "null"]
-        durationMinutes:
-          type: ["integer", "null"]
         notes:
           type: ["string", "null"]
 
-    ExerciseUpdate:
+    WorkoutSet:
       type: object
+      required: [id, exerciseId, setNumber, reps, completedAt]
       properties:
-        name:
-          type: string
-        muscleGroup:
-          type: string
-        sets:
-          type: ["integer", "null"]
+        id:
+          type: integer
+        exerciseId:
+          type: integer
+        setNumber:
+          type: integer
         reps:
-          type: ["integer", "null"]
+          type: integer
         weightKg:
           type: ["number", "null"]
-        durationMinutes:
-          type: ["integer", "null"]
-        notes:
-          type: ["string", "null"]
+        completedAt:
+          type: string
+          format: date-time
+
+    LogSetInput:
+      type: object
+      required: [reps]
+      properties:
+        reps:
+          type: integer
+          minimum: 1
+        weightKg:
+          type: ["number", "null"]
 
     ExerciseTemplate:
       type: object
-      required: [id, name, muscleGroup, type]
+      required: [id, name, muscleGroup, split, musclesWorked, formTip, alternatives]
       properties:
         id:
           type: integer
@@ -435,43 +425,59 @@ components:
           type: string
         muscleGroup:
           type: string
-        type:
+        split:
           type: string
-          enum: [strength, cardio, flexibility, hiit, sport, other]
-
-    StatsSummary:
-      type: object
-      required: [totalWorkouts, totalDurationMinutes, thisWeekWorkouts, thisMonthWorkouts, avgDurationMinutes, currentStreak]
-      properties:
-        totalWorkouts:
-          type: integer
-        totalDurationMinutes:
-          type: integer
-        thisWeekWorkouts:
-          type: integer
-        thisMonthWorkouts:
-          type: integer
-        avgDurationMinutes:
-          type: integer
-        currentStreak:
-          type: integer
-
-    WeeklyStats:
-      type: object
-      required: [week, count, totalDurationMinutes]
-      properties:
-        week:
+          enum: [Push, Pull, Legs, Upper, Arms, Lower]
+        musclesWorked:
           type: string
-        count:
-          type: integer
-        totalDurationMinutes:
-          type: integer
+        formTip:
+          type: string
+        alternatives:
+          type: array
+          items:
+            type: string
 
-    MuscleGroupStats:
+    ExerciseProgressSummary:
       type: object
-      required: [muscleGroup, count]
+      required: [exerciseName, muscleGroup, dataPoints]
       properties:
+        exerciseName:
+          type: string
         muscleGroup:
           type: string
-        count:
+        dataPoints:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProgressDataPoint"
+
+    ProgressDataPoint:
+      type: object
+      required: [date, maxWeightKg, totalVolume, totalReps]
+      properties:
+        date:
+          type: string
+          format: date
+        maxWeightKg:
+          type: ["number", "null"]
+        totalVolume:
+          type: number
+        totalReps:
           type: integer
+
+    PersonalRecord:
+      type: object
+      required: [exerciseName, muscleGroup, maxWeightKg, maxReps, achievedDate, workoutName]
+      properties:
+        exerciseName:
+          type: string
+        muscleGroup:
+          type: string
+        maxWeightKg:
+          type: ["number", "null"]
+        maxReps:
+          type: integer
+        achievedDate:
+          type: string
+          format: date
+        workoutName:
+          type: string

@@ -3,23 +3,17 @@
  * Do not edit manually.
  * Api
  * Fitness Tracker API
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
+import type { WorkoutSet } from './workoutSet';
 
 export interface Exercise {
   id: number;
   workoutId: number;
   name: string;
   muscleGroup: string;
-  /** @nullable */
-  sets?: number | null;
-  /** @nullable */
-  reps?: number | null;
-  /** @nullable */
-  weightKg?: number | null;
-  /** @nullable */
-  durationMinutes?: number | null;
+  order: number;
   /** @nullable */
   notes?: string | null;
-  order: number;
+  sets: WorkoutSet[];
 }

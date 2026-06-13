@@ -35,20 +35,12 @@
   --color-destructive: hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));
 
-  --color-chart-1: hsl(var(--chart-1));
-  --color-chart-2: hsl(var(--chart-2));
-  --color-chart-3: hsl(var(--chart-3));
-  --color-chart-4: hsl(var(--chart-4));
-  --color-chart-5: hsl(var(--chart-5));
-
-  --color-sidebar: hsl(var(--sidebar));
-  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
-  --color-sidebar-border: hsl(var(--sidebar-border));
-  --color-sidebar-primary: hsl(var(--sidebar-primary));
-  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
-  --color-sidebar-accent: hsl(var(--sidebar-accent));
-  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
-  --color-sidebar-ring: hsl(var(--sidebar-ring));
+  --color-split-push: #F97316;
+  --color-split-pull: #3B82F6;
+  --color-split-legs: #22C55E;
+  --color-split-upper: #EAB308;
+  --color-split-arms: #A855F7;
+  --color-split-lower: #EF4444;
 
   --font-sans: 'Inter', sans-serif;
   --font-display: 'Space Grotesk', sans-serif;
@@ -60,26 +52,25 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-:root {
-  /* Enforce Dark Theme Always for that "precision instrument" vibe */
+:root, .dark {
   color-scheme: dark;
   
-  --background: 0 0% 4%;
+  --background: 0 0% 0%;
   --foreground: 0 0% 98%;
 
   --border: 0 0% 15%;
   --input: 0 0% 15%;
-  --ring: 84 100% 50%;
+  --ring: 0 0% 98%;
 
-  --card: 0 0% 7%;
+  --card: 0 0% 4%;
   --card-foreground: 0 0% 98%;
   --card-border: 0 0% 15%;
 
-  --popover: 0 0% 7%;
+  --popover: 0 0% 4%;
   --popover-foreground: 0 0% 98%;
   --popover-border: 0 0% 15%;
 
-  --primary: 84 100% 50%;
+  --primary: 0 0% 98%;
   --primary-foreground: 0 0% 4%;
 
   --secondary: 0 0% 12%;
@@ -88,76 +79,13 @@
   --muted: 0 0% 12%;
   --muted-foreground: 0 0% 60%;
 
-  --accent: 84 100% 50%;
-  --accent-foreground: 0 0% 4%;
+  --accent: 0 0% 12%;
+  --accent-foreground: 0 0% 98%;
 
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 98%;
-
-  --sidebar: 0 0% 4%;
-  --sidebar-foreground: 0 0% 98%;
-  --sidebar-border: 0 0% 12%;
-  --sidebar-primary: 84 100% 50%;
-  --sidebar-primary-foreground: 0 0% 4%;
-  --sidebar-accent: 0 0% 12%;
-  --sidebar-accent-foreground: 0 0% 98%;
-  --sidebar-ring: 84 100% 50%;
-
-  --chart-1: 84 100% 50%;
-  --chart-2: 0 0% 70%;
-  --chart-3: 0 0% 40%;
-  --chart-4: 0 0% 25%;
-  --chart-5: 0 0% 15%;
 
   --radius: 0.25rem;
-}
-
-.dark {
-  /* Same as :root to enforce dark theme */
-  --background: 0 0% 4%;
-  --foreground: 0 0% 98%;
-
-  --border: 0 0% 15%;
-  --input: 0 0% 15%;
-  --ring: 84 100% 50%;
-
-  --card: 0 0% 7%;
-  --card-foreground: 0 0% 98%;
-  --card-border: 0 0% 15%;
-
-  --popover: 0 0% 7%;
-  --popover-foreground: 0 0% 98%;
-  --popover-border: 0 0% 15%;
-
-  --primary: 84 100% 50%;
-  --primary-foreground: 0 0% 4%;
-
-  --secondary: 0 0% 12%;
-  --secondary-foreground: 0 0% 98%;
-
-  --muted: 0 0% 12%;
-  --muted-foreground: 0 0% 60%;
-
-  --accent: 84 100% 50%;
-  --accent-foreground: 0 0% 4%;
-
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 98%;
-
-  --sidebar: 0 0% 4%;
-  --sidebar-foreground: 0 0% 98%;
-  --sidebar-border: 0 0% 12%;
-  --sidebar-primary: 84 100% 50%;
-  --sidebar-primary-foreground: 0 0% 4%;
-  --sidebar-accent: 0 0% 12%;
-  --sidebar-accent-foreground: 0 0% 98%;
-  --sidebar-ring: 84 100% 50%;
-
-  --chart-1: 84 100% 50%;
-  --chart-2: 0 0% 70%;
-  --chart-3: 0 0% 40%;
-  --chart-4: 0 0% 25%;
-  --chart-5: 0 0% 15%;
 }
 
 @layer base {
@@ -168,6 +96,6 @@
     @apply font-sans antialiased bg-background text-foreground;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-display tracking-tight;
+    @apply font-display tracking-tight font-bold;
   }
 }

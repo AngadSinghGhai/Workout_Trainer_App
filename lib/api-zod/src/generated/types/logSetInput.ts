@@ -6,10 +6,9 @@
  * OpenAPI spec version: 0.2.0
  */
 
-export interface ExerciseInput {
-  /** @minLength 1 */
-  name: string;
-  muscleGroup: string;
+export interface LogSetInput {
+  /** @minimum 1 */
+  reps: number;
   /** @nullable */
-  notes?: string | null;
+  weightKg?: number | null;
 }

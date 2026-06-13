@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Api
  * Fitness Tracker API
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import {
   useMutation,
@@ -22,17 +22,16 @@ import type {
 import type {
   Exercise,
   ExerciseInput,
+  ExerciseProgressSummary,
   ExerciseTemplate,
-  ExerciseUpdate,
-  GetWeeklyStatsParams,
   HealthStatus,
   ListWorkoutsParams,
-  MuscleGroupStats,
-  StatsSummary,
-  WeeklyStats,
+  LogSetInput,
+  PersonalRecord,
   Workout,
   WorkoutDetail,
   WorkoutInput,
+  WorkoutSet,
   WorkoutUpdate
 } from './api.schemas';
 
@@ -141,7 +140,7 @@ export const getListWorkoutsUrl = (params?: ListWorkoutsParams,) => {
 }
 
 /**
- * @summary List all workouts
+ * @summary List all workouts ordered by date desc
  */
 export const listWorkouts = async (params?: ListWorkoutsParams, options?: RequestInit): Promise<Workout[]> => {
 
@@ -188,7 +187,7 @@ export type ListWorkoutsQueryError = ErrorType<unknown>
 
 
 /**
- * @summary List all workouts
+ * @summary List all workouts ordered by date desc
  */
 
 export function useListWorkouts<TData = Awaited<ReturnType<typeof listWorkouts>>, TError = ErrorType<unknown>>(
@@ -289,7 +288,7 @@ export const getGetWorkoutUrl = (id: number,) => {
 }
 
 /**
- * @summary Get a workout with its exercises
+ * @summary Get a workout with its exercises and logged sets
  */
 export const getWorkout = async (id: number, options?: RequestInit): Promise<WorkoutDetail> => {
 
@@ -336,7 +335,7 @@ export type GetWorkoutQueryError = ErrorType<void>
 
 
 /**
- * @summary Get a workout with its exercises
+ * @summary Get a workout with its exercises and logged sets
  */
 
 export function useGetWorkout<TData = Awaited<ReturnType<typeof getWorkout>>, TError = ErrorType<void>>(
@@ -571,80 +570,6 @@ export const useAddExercise = <TError = ErrorType<unknown>,
       return useMutation(getAddExerciseMutationOptions(options));
     }
 
-export const getUpdateExerciseUrl = (id: number,
-    exerciseId: number,) => {
-
-
-
-
-  return `/api/workouts/${id}/exercises/${exerciseId}`
-}
-
-/**
- * @summary Update an exercise
- */
-export const updateExercise = async (id: number,
-    exerciseId: number,
-    exerciseUpdate: ExerciseUpdate, options?: RequestInit): Promise<Exercise> => {
-
-  return customFetch<Exercise>(getUpdateExerciseUrl(id,exerciseId),
-  {
-    ...options,
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      exerciseUpdate,)
-  }
-);}
-
-
-
-
-export const getUpdateExerciseMutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateExercise>>, TError,{id: number;exerciseId: number;data: BodyType<ExerciseUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof updateExercise>>, TError,{id: number;exerciseId: number;data: BodyType<ExerciseUpdate>}, TContext> => {
-
-const mutationKey = ['updateExercise'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateExercise>>, {id: number;exerciseId: number;data: BodyType<ExerciseUpdate>}> = (props) => {
-          const {id,exerciseId,data} = props ?? {};
-
-          return  updateExercise(id,exerciseId,data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type UpdateExerciseMutationResult = NonNullable<Awaited<ReturnType<typeof updateExercise>>>
-    export type UpdateExerciseMutationBody = BodyType<ExerciseUpdate>
-    export type UpdateExerciseMutationError = ErrorType<unknown>
-
-    /**
- * @summary Update an exercise
- */
-export const useUpdateExercise = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateExercise>>, TError,{id: number;exerciseId: number;data: BodyType<ExerciseUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof updateExercise>>,
-        TError,
-        {id: number;exerciseId: number;data: BodyType<ExerciseUpdate>},
-        TContext
-      > => {
-      return useMutation(getUpdateExerciseMutationOptions(options));
-    }
-
 export const getDeleteExerciseUrl = (id: number,
     exerciseId: number,) => {
 
@@ -655,7 +580,7 @@ export const getDeleteExerciseUrl = (id: number,
 }
 
 /**
- * @summary Delete an exercise
+ * @summary Delete an exercise and its sets
  */
 export const deleteExercise = async (id: number,
     exerciseId: number, options?: RequestInit): Promise<void> => {
@@ -704,7 +629,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type DeleteExerciseMutationError = ErrorType<unknown>
 
     /**
- * @summary Delete an exercise
+ * @summary Delete an exercise and its sets
  */
 export const useDeleteExercise = <TError = ErrorType<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteExercise>>, TError,{id: number;exerciseId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
@@ -717,6 +642,154 @@ export const useDeleteExercise = <TError = ErrorType<unknown>,
       return useMutation(getDeleteExerciseMutationOptions(options));
     }
 
+export const getLogSetUrl = (id: number,
+    exerciseId: number,) => {
+
+
+
+
+  return `/api/workouts/${id}/exercises/${exerciseId}/sets`
+}
+
+/**
+ * @summary Log a set for an exercise
+ */
+export const logSet = async (id: number,
+    exerciseId: number,
+    logSetInput: LogSetInput, options?: RequestInit): Promise<WorkoutSet> => {
+
+  return customFetch<WorkoutSet>(getLogSetUrl(id,exerciseId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      logSetInput,)
+  }
+);}
+
+
+
+
+export const getLogSetMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logSet>>, TError,{id: number;exerciseId: number;data: BodyType<LogSetInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof logSet>>, TError,{id: number;exerciseId: number;data: BodyType<LogSetInput>}, TContext> => {
+
+const mutationKey = ['logSet'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof logSet>>, {id: number;exerciseId: number;data: BodyType<LogSetInput>}> = (props) => {
+          const {id,exerciseId,data} = props ?? {};
+
+          return  logSet(id,exerciseId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LogSetMutationResult = NonNullable<Awaited<ReturnType<typeof logSet>>>
+    export type LogSetMutationBody = BodyType<LogSetInput>
+    export type LogSetMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Log a set for an exercise
+ */
+export const useLogSet = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logSet>>, TError,{id: number;exerciseId: number;data: BodyType<LogSetInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof logSet>>,
+        TError,
+        {id: number;exerciseId: number;data: BodyType<LogSetInput>},
+        TContext
+      > => {
+      return useMutation(getLogSetMutationOptions(options));
+    }
+
+export const getDeleteSetUrl = (id: number,
+    exerciseId: number,
+    setId: number,) => {
+
+
+
+
+  return `/api/workouts/${id}/exercises/${exerciseId}/sets/${setId}`
+}
+
+/**
+ * @summary Delete a logged set
+ */
+export const deleteSet = async (id: number,
+    exerciseId: number,
+    setId: number, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getDeleteSetUrl(id,exerciseId,setId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteSetMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSet>>, TError,{id: number;exerciseId: number;setId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteSet>>, TError,{id: number;exerciseId: number;setId: number}, TContext> => {
+
+const mutationKey = ['deleteSet'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteSet>>, {id: number;exerciseId: number;setId: number}> = (props) => {
+          const {id,exerciseId,setId} = props ?? {};
+
+          return  deleteSet(id,exerciseId,setId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteSetMutationResult = NonNullable<Awaited<ReturnType<typeof deleteSet>>>
+
+    export type DeleteSetMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Delete a logged set
+ */
+export const useDeleteSet = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSet>>, TError,{id: number;exerciseId: number;setId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteSet>>,
+        TError,
+        {id: number;exerciseId: number;setId: number},
+        TContext
+      > => {
+      return useMutation(getDeleteSetMutationOptions(options));
+    }
+
 export const getListExerciseTemplatesUrl = () => {
 
 
@@ -726,7 +799,7 @@ export const getListExerciseTemplatesUrl = () => {
 }
 
 /**
- * @summary List exercise templates
+ * @summary List all exercise templates with info and alternatives
  */
 export const listExerciseTemplates = async ( options?: RequestInit): Promise<ExerciseTemplate[]> => {
 
@@ -773,7 +846,7 @@ export type ListExerciseTemplatesQueryError = ErrorType<unknown>
 
 
 /**
- * @summary List exercise templates
+ * @summary List all exercise templates with info and alternatives
  */
 
 export function useListExerciseTemplates<TData = Awaited<ReturnType<typeof listExerciseTemplates>>, TError = ErrorType<unknown>>(
@@ -794,20 +867,20 @@ export function useListExerciseTemplates<TData = Awaited<ReturnType<typeof listE
 
 
 
-export const getGetStatsSummaryUrl = () => {
+export const getGetProgressUrl = () => {
 
 
 
 
-  return `/api/stats/summary`
+  return `/api/progress`
 }
 
 /**
- * @summary Get overall fitness stats summary
+ * @summary Get progress data for all exercises (max weight and volume over time)
  */
-export const getStatsSummary = async ( options?: RequestInit): Promise<StatsSummary> => {
+export const getProgress = async ( options?: RequestInit): Promise<ExerciseProgressSummary[]> => {
 
-  return customFetch<StatsSummary>(getGetStatsSummaryUrl(),
+  return customFetch<ExerciseProgressSummary[]>(getGetProgressUrl(),
   {
     ...options,
     method: 'GET'
@@ -820,45 +893,45 @@ export const getStatsSummary = async ( options?: RequestInit): Promise<StatsSumm
 
 
 
-export const getGetStatsSummaryQueryKey = () => {
+export const getGetProgressQueryKey = () => {
     return [
-    `/api/stats/summary`
+    `/api/progress`
     ] as const;
     }
 
 
-export const getGetStatsSummaryQueryOptions = <TData = Awaited<ReturnType<typeof getStatsSummary>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStatsSummary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getGetProgressQueryOptions = <TData = Awaited<ReturnType<typeof getProgress>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProgress>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetStatsSummaryQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetProgressQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStatsSummary>>> = ({ signal }) => getStatsSummary({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getProgress>>> = ({ signal }) => getProgress({ signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStatsSummary>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getProgress>>, TError, TData> & { queryKey: QueryKey }
 }
 
-export type GetStatsSummaryQueryResult = NonNullable<Awaited<ReturnType<typeof getStatsSummary>>>
-export type GetStatsSummaryQueryError = ErrorType<unknown>
+export type GetProgressQueryResult = NonNullable<Awaited<ReturnType<typeof getProgress>>>
+export type GetProgressQueryError = ErrorType<unknown>
 
 
 /**
- * @summary Get overall fitness stats summary
+ * @summary Get progress data for all exercises (max weight and volume over time)
  */
 
-export function useGetStatsSummary<TData = Awaited<ReturnType<typeof getStatsSummary>>, TError = ErrorType<unknown>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStatsSummary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export function useGetProgress<TData = Awaited<ReturnType<typeof getProgress>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProgress>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getGetStatsSummaryQueryOptions(options)
+  const queryOptions = getGetProgressQueryOptions(options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -871,27 +944,20 @@ export function useGetStatsSummary<TData = Awaited<ReturnType<typeof getStatsSum
 
 
 
-export const getGetWeeklyStatsUrl = (params?: GetWeeklyStatsParams,) => {
-  const normalizedParams = new URLSearchParams();
+export const getGetPersonalRecordsUrl = () => {
 
-  Object.entries(params || {}).forEach(([key, value]) => {
 
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : value.toString())
-    }
-  });
 
-  const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/api/stats/weekly?${stringifiedParams}` : `/api/stats/weekly`
+  return `/api/personal-records`
 }
 
 /**
- * @summary Get workouts per week for chart
+ * @summary All-time personal records per exercise
  */
-export const getWeeklyStats = async (params?: GetWeeklyStatsParams, options?: RequestInit): Promise<WeeklyStats[]> => {
+export const getPersonalRecords = async ( options?: RequestInit): Promise<PersonalRecord[]> => {
 
-  return customFetch<WeeklyStats[]>(getGetWeeklyStatsUrl(params),
+  return customFetch<PersonalRecord[]>(getGetPersonalRecordsUrl(),
   {
     ...options,
     method: 'GET'
@@ -904,122 +970,45 @@ export const getWeeklyStats = async (params?: GetWeeklyStatsParams, options?: Re
 
 
 
-export const getGetWeeklyStatsQueryKey = (params?: GetWeeklyStatsParams,) => {
+export const getGetPersonalRecordsQueryKey = () => {
     return [
-    `/api/stats/weekly`, ...(params ? [params] : [])
+    `/api/personal-records`
     ] as const;
     }
 
 
-export const getGetWeeklyStatsQueryOptions = <TData = Awaited<ReturnType<typeof getWeeklyStats>>, TError = ErrorType<unknown>>(params?: GetWeeklyStatsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getWeeklyStats>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getGetPersonalRecordsQueryOptions = <TData = Awaited<ReturnType<typeof getPersonalRecords>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPersonalRecords>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetWeeklyStatsQueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getGetPersonalRecordsQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getWeeklyStats>>> = ({ signal }) => getWeeklyStats(params, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPersonalRecords>>> = ({ signal }) => getPersonalRecords({ signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getWeeklyStats>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPersonalRecords>>, TError, TData> & { queryKey: QueryKey }
 }
 
-export type GetWeeklyStatsQueryResult = NonNullable<Awaited<ReturnType<typeof getWeeklyStats>>>
-export type GetWeeklyStatsQueryError = ErrorType<unknown>
+export type GetPersonalRecordsQueryResult = NonNullable<Awaited<ReturnType<typeof getPersonalRecords>>>
+export type GetPersonalRecordsQueryError = ErrorType<unknown>
 
 
 /**
- * @summary Get workouts per week for chart
+ * @summary All-time personal records per exercise
  */
 
-export function useGetWeeklyStats<TData = Awaited<ReturnType<typeof getWeeklyStats>>, TError = ErrorType<unknown>>(
- params?: GetWeeklyStatsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getWeeklyStats>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export function useGetPersonalRecords<TData = Awaited<ReturnType<typeof getPersonalRecords>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPersonalRecords>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getGetWeeklyStatsQueryOptions(params,options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-
-
-
-export const getGetMuscleGroupStatsUrl = () => {
-
-
-
-
-  return `/api/stats/muscle-groups`
-}
-
-/**
- * @summary Get exercise volume by muscle group
- */
-export const getMuscleGroupStats = async ( options?: RequestInit): Promise<MuscleGroupStats[]> => {
-
-  return customFetch<MuscleGroupStats[]>(getGetMuscleGroupStatsUrl(),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getGetMuscleGroupStatsQueryKey = () => {
-    return [
-    `/api/stats/muscle-groups`
-    ] as const;
-    }
-
-
-export const getGetMuscleGroupStatsQueryOptions = <TData = Awaited<ReturnType<typeof getMuscleGroupStats>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMuscleGroupStats>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetMuscleGroupStatsQueryKey();
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMuscleGroupStats>>> = ({ signal }) => getMuscleGroupStats({ signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMuscleGroupStats>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetMuscleGroupStatsQueryResult = NonNullable<Awaited<ReturnType<typeof getMuscleGroupStats>>>
-export type GetMuscleGroupStatsQueryError = ErrorType<unknown>
-
-
-/**
- * @summary Get exercise volume by muscle group
- */
-
-export function useGetMuscleGroupStats<TData = Awaited<ReturnType<typeof getMuscleGroupStats>>, TError = ErrorType<unknown>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMuscleGroupStats>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getGetMuscleGroupStatsQueryOptions(options)
+  const queryOptions = getGetPersonalRecordsQueryOptions(options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

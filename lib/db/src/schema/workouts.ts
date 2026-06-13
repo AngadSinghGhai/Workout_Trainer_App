@@ -1,21 +1,16 @@
-import { pgTable, serial, text, integer, numeric, date, timestamp } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
-import { z } from "zod/v4";
+import { pgTable, serial, text, integer, numeric, date, timestamp, json } from "drizzle-orm/pg-core";
 
-export const workoutTypeEnum = ["strength", "cardio", "flexibility", "hiit", "sport", "other"] as const;
+export const splitEnum = ["Push", "Pull", "Legs", "Upper", "Arms", "Lower"] as const;
+export type Split = typeof splitEnum[number];
 
 export const workoutsTable = pgTable("workouts", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   date: date("date").notNull(),
-  type: text("type").notNull().$type<typeof workoutTypeEnum[number]>(),
-  durationMinutes: integer("duration_minutes"),
+  split: text("split").notNull().$type<Split>(),
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
-
-export const insertWorkoutSchema = createInsertSchema(workoutsTable).omit({ id: true, createdAt: true });
-export type InsertWorkout = z.infer<typeof insertWorkoutSchema>;
 export type Workout = typeof workoutsTable.$inferSelect;
 
 export const exercisesTable = pgTable("exercises", {
@@ -23,25 +18,28 @@ export const exercisesTable = pgTable("exercises", {
   workoutId: integer("workout_id").notNull().references(() => workoutsTable.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   muscleGroup: text("muscle_group").notNull(),
-  sets: integer("sets"),
-  reps: integer("reps"),
-  weightKg: numeric("weight_kg", { precision: 6, scale: 2 }),
-  durationMinutes: integer("duration_minutes"),
   notes: text("notes"),
   order: integer("order").notNull().default(0),
 });
-
-export const insertExerciseSchema = createInsertSchema(exercisesTable).omit({ id: true });
-export type InsertExercise = z.infer<typeof insertExerciseSchema>;
 export type Exercise = typeof exercisesTable.$inferSelect;
+
+export const workoutSetsTable = pgTable("workout_sets", {
+  id: serial("id").primaryKey(),
+  exerciseId: integer("exercise_id").notNull().references(() => exercisesTable.id, { onDelete: "cascade" }),
+  setNumber: integer("set_number").notNull(),
+  reps: integer("reps").notNull(),
+  weightKg: numeric("weight_kg", { precision: 6, scale: 2 }),
+  completedAt: timestamp("completed_at").defaultNow().notNull(),
+});
+export type WorkoutSet = typeof workoutSetsTable.$inferSelect;
 
 export const exerciseTemplatesTable = pgTable("exercise_templates", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   muscleGroup: text("muscle_group").notNull(),
-  type: text("type").notNull().$type<typeof workoutTypeEnum[number]>(),
+  split: text("split").notNull().$type<Split>(),
+  musclesWorked: text("muscles_worked").notNull(),
+  formTip: text("form_tip").notNull(),
+  alternatives: json("alternatives").$type<string[]>().notNull().default([]),
 });
-
-export const insertExerciseTemplateSchema = createInsertSchema(exerciseTemplatesTable).omit({ id: true });
-export type InsertExerciseTemplate = z.infer<typeof insertExerciseTemplateSchema>;
 export type ExerciseTemplate = typeof exerciseTemplatesTable.$inferSelect;

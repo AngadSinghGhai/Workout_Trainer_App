@@ -10,10 +10,10 @@ router.get("/exercise-templates", async (req, res) => {
     const templates = await db
       .select()
       .from(exerciseTemplatesTable)
-      .orderBy(asc(exerciseTemplatesTable.muscleGroup), asc(exerciseTemplatesTable.name));
+      .orderBy(asc(exerciseTemplatesTable.split), asc(exerciseTemplatesTable.name));
     res.json(templates);
   } catch (err) {
-    req.log.error({ err }, "Failed to list exercise templates");
+    req.log.error({ err }, "Failed to list templates");
     res.status(500).json({ error: "Internal server error" });
   }
 });

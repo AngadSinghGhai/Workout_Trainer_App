@@ -3,13 +3,16 @@
  * Do not edit manually.
  * Api
  * Fitness Tracker API
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
-import type { ExerciseTemplateType } from './exerciseTemplateType';
+import type { ExerciseTemplateSplit } from './exerciseTemplateSplit';
 
 export interface ExerciseTemplate {
   id: number;
   name: string;
   muscleGroup: string;
-  type: ExerciseTemplateType;
+  split: ExerciseTemplateSplit;
+  musclesWorked: string;
+  formTip: string;
+  alternatives: string[];
 }

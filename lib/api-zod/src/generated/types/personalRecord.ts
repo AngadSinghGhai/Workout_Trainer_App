@@ -6,10 +6,12 @@
  * OpenAPI spec version: 0.2.0
  */
 
-export interface ExerciseInput {
-  /** @minLength 1 */
-  name: string;
+export interface PersonalRecord {
+  exerciseName: string;
   muscleGroup: string;
   /** @nullable */
-  notes?: string | null;
+  maxWeightKg: number | null;
+  maxReps: number;
+  achievedDate: Date;
+  workoutName: string;
 }
