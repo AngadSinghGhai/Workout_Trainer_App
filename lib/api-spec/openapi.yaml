@@ -1,22 +1,28 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Fitness Tracker API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: workouts
+    description: Workout sessions
+  - name: exercises
+    description: Exercises within workouts
+  - name: templates
+    description: Exercise templates
+  - name: stats
+    description: Statistics and aggregates
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +30,244 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /workouts:
+    get:
+      operationId: listWorkouts
+      tags: [workouts]
+      summary: List all workouts
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: List of workouts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Workout"
+    post:
+      operationId: createWorkout
+      tags: [workouts]
+      summary: Create a new workout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkoutInput"
+      responses:
+        "201":
+          description: Created workout
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Workout"
+
+  /workouts/{id}:
+    get:
+      operationId: getWorkout
+      tags: [workouts]
+      summary: Get a workout with its exercises
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Workout with exercises
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkoutDetail"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateWorkout
+      tags: [workouts]
+      summary: Update a workout
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkoutUpdate"
+      responses:
+        "200":
+          description: Updated workout
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Workout"
+    delete:
+      operationId: deleteWorkout
+      tags: [workouts]
+      summary: Delete a workout
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /workouts/{id}/exercises:
+    post:
+      operationId: addExercise
+      tags: [exercises]
+      summary: Add an exercise to a workout
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExerciseInput"
+      responses:
+        "201":
+          description: Created exercise
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Exercise"
+
+  /workouts/{id}/exercises/{exerciseId}:
+    patch:
+      operationId: updateExercise
+      tags: [exercises]
+      summary: Update an exercise
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: exerciseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExerciseUpdate"
+      responses:
+        "200":
+          description: Updated exercise
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Exercise"
+    delete:
+      operationId: deleteExercise
+      tags: [exercises]
+      summary: Delete an exercise
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: exerciseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /exercise-templates:
+    get:
+      operationId: listExerciseTemplates
+      tags: [templates]
+      summary: List exercise templates
+      responses:
+        "200":
+          description: List of templates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ExerciseTemplate"
+
+  /stats/summary:
+    get:
+      operationId: getStatsSummary
+      tags: [stats]
+      summary: Get overall fitness stats summary
+      responses:
+        "200":
+          description: Stats summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatsSummary"
+
+  /stats/weekly:
+    get:
+      operationId: getWeeklyStats
+      tags: [stats]
+      summary: Get workouts per week for chart
+      parameters:
+        - name: weeks
+          in: query
+          schema:
+            type: integer
+            default: 8
+      responses:
+        "200":
+          description: Weekly stats
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WeeklyStats"
+
+  /stats/muscle-groups:
+    get:
+      operationId: getMuscleGroupStats
+      tags: [stats]
+      summary: Get exercise volume by muscle group
+      responses:
+        "200":
+          description: Muscle group breakdown
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MuscleGroupStats"
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +275,203 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    Workout:
+      type: object
+      required: [id, name, date, type, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        date:
+          type: string
+          format: date
+        type:
+          type: string
+          enum: [strength, cardio, flexibility, hiit, sport, other]
+        durationMinutes:
+          type: ["integer", "null"]
+        notes:
+          type: ["string", "null"]
+        exerciseCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    WorkoutDetail:
+      type: object
+      required: [id, name, date, type, exercises, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        date:
+          type: string
+          format: date
+        type:
+          type: string
+          enum: [strength, cardio, flexibility, hiit, sport, other]
+        durationMinutes:
+          type: ["integer", "null"]
+        notes:
+          type: ["string", "null"]
+        exercises:
+          type: array
+          items:
+            $ref: "#/components/schemas/Exercise"
+        createdAt:
+          type: string
+          format: date-time
+
+    WorkoutInput:
+      type: object
+      required: [name, date, type]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        date:
+          type: string
+          format: date
+        type:
+          type: string
+          enum: [strength, cardio, flexibility, hiit, sport, other]
+        durationMinutes:
+          type: ["integer", "null"]
+        notes:
+          type: ["string", "null"]
+
+    WorkoutUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        date:
+          type: string
+          format: date
+        type:
+          type: string
+          enum: [strength, cardio, flexibility, hiit, sport, other]
+        durationMinutes:
+          type: ["integer", "null"]
+        notes:
+          type: ["string", "null"]
+
+    Exercise:
+      type: object
+      required: [id, workoutId, name, muscleGroup, order]
+      properties:
+        id:
+          type: integer
+        workoutId:
+          type: integer
+        name:
+          type: string
+        muscleGroup:
+          type: string
+        sets:
+          type: ["integer", "null"]
+        reps:
+          type: ["integer", "null"]
+        weightKg:
+          type: ["number", "null"]
+        durationMinutes:
+          type: ["integer", "null"]
+        notes:
+          type: ["string", "null"]
+        order:
+          type: integer
+
+    ExerciseInput:
+      type: object
+      required: [name, muscleGroup]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        muscleGroup:
+          type: string
+        sets:
+          type: ["integer", "null"]
+        reps:
+          type: ["integer", "null"]
+        weightKg:
+          type: ["number", "null"]
+        durationMinutes:
+          type: ["integer", "null"]
+        notes:
+          type: ["string", "null"]
+
+    ExerciseUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        muscleGroup:
+          type: string
+        sets:
+          type: ["integer", "null"]
+        reps:
+          type: ["integer", "null"]
+        weightKg:
+          type: ["number", "null"]
+        durationMinutes:
+          type: ["integer", "null"]
+        notes:
+          type: ["string", "null"]
+
+    ExerciseTemplate:
+      type: object
+      required: [id, name, muscleGroup, type]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        muscleGroup:
+          type: string
+        type:
+          type: string
+          enum: [strength, cardio, flexibility, hiit, sport, other]
+
+    StatsSummary:
+      type: object
+      required: [totalWorkouts, totalDurationMinutes, thisWeekWorkouts, thisMonthWorkouts, avgDurationMinutes, currentStreak]
+      properties:
+        totalWorkouts:
+          type: integer
+        totalDurationMinutes:
+          type: integer
+        thisWeekWorkouts:
+          type: integer
+        thisMonthWorkouts:
+          type: integer
+        avgDurationMinutes:
+          type: integer
+        currentStreak:
+          type: integer
+
+    WeeklyStats:
+      type: object
+      required: [week, count, totalDurationMinutes]
+      properties:
+        week:
+          type: string
+        count:
+          type: integer
+        totalDurationMinutes:
+          type: integer
+
+    MuscleGroupStats:
+      type: object
+      required: [muscleGroup, count]
+      properties:
+        muscleGroup:
+          type: string
+        count:
+          type: integer
