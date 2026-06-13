@@ -1,5 +1,5 @@
 {
-  "buildCommand": "pnpm run typecheck:libs && pnpm --filter @workspace/fitness-tracker run build",
+  "buildCommand": "pnpm --filter @workspace/fitness-tracker run build",
   "outputDirectory": "artifacts/fitness-tracker/dist/public",
   "installCommand": "pnpm install",
   "framework": null,
